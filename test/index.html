@@ -63,6 +63,12 @@
     <p><time id="testTimeTitle" class="timeago" datetime="2012-05-07T10:06:02+02:00" title="May 10, 2012 10:06">May 10, 2012</time></p>
     <p><time id="testTimeTitle2" class="timeago" datetime="2012-05-07T10:06:02+02:00">May 10, 2012</time></p>
 
+    <h2>Cutoff</h2>
+
+    <p>Date that is older than cutoff: <abbr class="timeago cutoff doCutoff" title="1978-12-18">(this should be displayed)</abbr></p>
+
+    <p>Date that is newer than cutoff: <abbr class="timeago loaded cutoff dontCutoff">(you shouldn't see this)</abbr></p>
+
     <h2>Errors</h2>
 
     <p>Bad (letters): <abbr class="bad timeago" title="bleh">(this should be displayed)</abbr>.</p>
@@ -84,6 +90,7 @@
       <li><abbr id="testParsing9" class="todate" title="1978-12-18 17:17:00.021432Z"></abbr> [from Z with microseconds]</li>
       <li><abbr id="testParsing10" class="todate" title="1978-12-18 17:17:00.0Z"></abbr> [from Z with tenths of a second]</li>
       <li><abbr id="testParsing11" class="todate" title="1978-12-18 17:17:00.02Z"></abbr> [from Z with hundreths of a second]</li>
+      <li><abbr id="testParsing12" class="todate" title="1978-12-19T02:17:00+09"></abbr> [from +09]</li>
     </ul>
 
     <h2>Wording</h2>
@@ -182,6 +189,23 @@
       <li><abbr id="testMillisSettings8" class="tomillis" title="90"></abbr> [90 sec]</li>
       <li><abbr id="testMillisSettings9" class="tomillis" title="120"></abbr> [120 sec]</li>
     </ul>
+
+    <h2>Do Not Allow Future</h2>
+
+    <ul>
+      <li><abbr id="testAllowFutureFalse1" class="doNotAllowFuture" title="2012-01-01T09:24:17Z">(you shouldn't see this)</abbr></li>
+    </ul>
+
+    <h2>Do Not Allow Past</h2>
+
+    <ul>
+      <li><abbr id="testAllowPastFalse1" class="doNotAllowPast" title="2008-01-01T09:24:17Z">(you shouldn't see this)</abbr></li>
+      <li><abbr id="testAllowPastAndFutureFalse" title="2008-01-01T09:24:17Z"></abbr></li>
+    </ul>
+
+    <h2>Disposal</h2>
+    <p><abbr class="disposal disposed"></abbr></p>
+    <p><abbr class="disposal notDisposed"></abbr></p>
   </div>
 
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -212,8 +236,12 @@
 
       prepareDynamicDates();
 
-      $("abbr.timeago").timeago();
+      $("abbr.timeago").not("abbr.cutoff").timeago();
       $("time.timeago").timeago();
+
+      loadCutoffSetting();
+      $("abbr.cutoff").timeago();
+      unloadCutoffSetting();
 
       var tooltip = $("#testTooltip").data("timeago");
 
@@ -227,6 +255,16 @@
       loadNumbers();
       $("abbr.tonumbers").each(toWords);
       unloadNumbers();
+
+      loadDoNotAllowFuture();
+      $("abbr.doNotAllowFuture").timeago();
+      unloadDoNotAllowFuture();
+
+      loadDoNotAllowPast();
+      $("abbr.doNotAllowPast").timeago();
+      unloadDoNotAllowPast();
+
+      setupDisposal();
 
       loadYoungOldYears();
       $("abbr.toyoungold").each(toWords);
@@ -291,6 +329,20 @@
         ok(tooltip.datetime, "datetime set");
       });
 
+      module("Cutoff");
+
+      test("should not change dates older than cutoff setting", function () {
+        ok(testElements("abbr.doCutoff", function (element) {
+          return (element.html() === "(this should be displayed)");
+        }), "Cutoff setting working fine");
+      });
+
+      test("should change dates newer than cutoff setting", function () {
+        ok(testElements("abbr.dontCutoff", function (element) {
+          return (element.html() === "less than a minute ago");
+        }), "Cutoff setting working fine");
+      });
+
       module("Tooltip");
 
       test("should set title to original text contents", function () {
@@ -316,154 +368,159 @@
 
       test("From Z", function () {
         var time = $("#testParsing1");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From -00:00", function () {
         var time = $("#testParsing2");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From -05:00", function () {
         var time = $("#testParsing3");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From -0500", function () {
         var time = $("#testParsing4");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From +09:00", function () {
         var time = $("#testParsing5");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From +0900", function () {
         var time = $("#testParsing6");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From blank TZ", function () {
         var time = $("#testParsing7");
         var correctMatch = /Mon, 18 Dec 1978 \d\d:17:00 (GMT|UTC)/;
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From Z with milliseconds", function () {
         var time = $("#testParsing8");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From Z with microseconds", function () {
         var time = $("#testParsing9");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From Z with tenths of a second", function () {
         var time = $("#testParsing10");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       test("From Z with hundreths of a second", function () {
         var time = $("#testParsing11");
-        ok((time.html().match(correctMatch)), "Correctly parsed " + time.attr("title"));
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
+      });
+
+      test("From +09", function () {
+        var time = $("#testParsing12");
+        ok((time.html().match(correctMatch)), "Incorrectly parsed " + time.attr("title"));
       });
 
       module("Wording");
 
       test("-120 min", function () {
-        ok(($("#testWording1").html() === "about 2 hours from now"), "Correctly parsed");
+        ok(($("#testWording1").html() === "about 2 hours from now"), "Incorrectly parsed");
       });
 
       test("-60 sec", function () {
-        ok(($("#testWording2").html() === "about a minute from now"), "Correctly parsed");
+        ok(($("#testWording2").html() === "about a minute from now"), "Incorrectly parsed");
       });
 
       test("-30 sec", function () {
-        ok(($("#testWording3").html() === "less than a minute from now"), "Correctly parsed");
+        ok(($("#testWording3").html() === "less than a minute from now"), "Incorrectly parsed");
       });
 
       test("-1 sec", function () {
-        ok(($("#testWording4").html() === "less than a minute from now"), "Correctly parsed");
+        ok(($("#testWording4").html() === "less than a minute from now"), "Incorrectly parsed");
       });
 
       test("0 sec", function () {
-        ok(($("#testWording5").html() === "less than a minute ago"), "Correctly parsed");
+        ok(($("#testWording5").html() === "less than a minute ago"), "Incorrectly parsed");
       });
 
       test("30 sec", function () {
-        ok(($("#testWording6").html() === "less than a minute ago"), "Correctly parsed");
+        ok(($("#testWording6").html() === "less than a minute ago"), "Incorrectly parsed");
       });
 
       test("45 sec", function () {
-        ok(($("#testWording7").html() === "about a minute ago"), "Correctly parsed");
+        ok(($("#testWording7").html() === "about a minute ago"), "Incorrectly parsed");
       });
 
       test("90 sec", function () {
-        ok(($("#testWording8").html() === "2 minutes ago"), "Correctly parsed");
+        ok(($("#testWording8").html() === "2 minutes ago"), "Incorrectly parsed");
       });
 
       test("120 sec", function () {
-        ok(($("#testWording9").html() === "2 minutes ago"), "Correctly parsed");
+        ok(($("#testWording9").html() === "2 minutes ago"), "Incorrectly parsed");
       });
 
       test("45 min", function () {
-        ok(($("#testWording10").html() === "about an hour ago"), "Correctly parsed");
+        ok(($("#testWording10").html() === "about an hour ago"), "Incorrectly parsed");
       });
 
       test("89 min", function () {
-        ok(($("#testWording11").html() === "about an hour ago"), "Correctly parsed");
+        ok(($("#testWording11").html() === "about an hour ago"), "Incorrectly parsed");
       });
 
       test("90 min", function () {
-        ok(($("#testWording12").html() === "about 2 hours ago"), "Correctly parsed");
+        ok(($("#testWording12").html() === "about 2 hours ago"), "Incorrectly parsed");
       });
 
       test("120 min", function () {
-        ok(($("#testWording13").html() === "about 2 hours ago"), "Correctly parsed");
+        ok(($("#testWording13").html() === "about 2 hours ago"), "Incorrectly parsed");
       });
 
       test("1380 min", function () {
-        ok(($("#testWording14").html() === "about 23 hours ago"), "Correctly parsed");
+        ok(($("#testWording14").html() === "about 23 hours ago"), "Incorrectly parsed");
       });
 
       test("25 hours", function () {
-        ok(($("#testWording15").html() === "a day ago"), "Correctly parsed");
+        ok(($("#testWording15").html() === "a day ago"), "Incorrectly parsed");
       });
 
       test("41 hour", function () {
-        ok(($("#testWording16a").html() === "a day ago"), "Correctly parsed");
+        ok(($("#testWording16a").html() === "a day ago"), "Incorrectly parsed");
       });
       test("42 hours", function () {
-        ok(($("#testWording16b").html() === "2 days ago"), "Correctly parsed");
+        ok(($("#testWording16b").html() === "2 days ago"), "Incorrectly parsed");
       });
       test("48 hours", function () {
-        ok(($("#testWording16c").html() === "2 days ago"), "Correctly parsed");
+        ok(($("#testWording16c").html() === "2 days ago"), "Incorrectly parsed");
       });
 
       test("696 hours", function () {
-        ok(($("#testWording17").html() === "29 days ago"), "Correctly parsed");
+        ok(($("#testWording17").html() === "29 days ago"), "Incorrectly parsed");
       });
 
       test("30 days", function () {
-        ok(($("#testWording18").html() === "about a month ago"), "Correctly parsed");
+        ok(($("#testWording18").html() === "about a month ago"), "Incorrectly parsed");
       });
 
       test("190 days", function () {
-        ok(($("#testWording19").html() === "6 months ago"), "Correctly parsed");
+        ok(($("#testWording19").html() === "6 months ago"), "Incorrectly parsed");
       });
 
       test("366 days", function () {
-        ok(($("#testWording20").html() === "about a year ago"), "Correctly parsed");
+        ok(($("#testWording20").html() === "about a year ago"), "Incorrectly parsed");
       });
 
       test("725 days", function () {
-        ok(($("#testWording21").html() === "2 years ago"), "Correctly parsed");
+        ok(($("#testWording21").html() === "2 years ago"), "Incorrectly parsed");
       });
 
       test("1095 days", function () {
-        ok(($("#testWording22").html() === "3 years ago"), "Correctly parsed");
+        ok(($("#testWording22").html() === "3 years ago"), "Incorrectly parsed");
       });
 
       module("Settings");
@@ -557,6 +614,58 @@
       test("wordSeparator", function () {
         ok($("#testNoSpaces1").html().match(/^2minutesago$/), "Settings correctly applied");
         ok($("#testNullSpaces1").html().match(/^2minutesago$/), "Settings correctly applied");
+      });
+
+      module("Allow Future and Past");
+
+      // if allowFuture is false, then a minute into the future is actually reported as a minute in the past.
+      // we did not want to alter the current behavior and break backwards compatability
+      test("allow future false with a future date moves time backwards", function () {
+        equal($("#testAllowFutureFalse1").html(), "2 years ago");
+      });
+
+      test("allow future false with a future date moves time backwards", function () {
+        equal($("#testAllowPastFalse1").html(), "in the past");
+      });
+
+      test("throws if allowPast and allowFuture are both false", function () {
+        // setup
+        var origAllowFuture = $.timeago.settings.allowFuture;
+        var origAllowPast = $.timeago.settings.allowPast;
+        $.timeago.settings.allowFuture = false;
+        $.timeago.settings.allowPast = false;
+
+        try {
+          throws(function () {
+            $("#testAllowPastAndFutureFalse").timeago();
+          });
+        } finally {
+          // teardown
+          $.timeago.settings.allowFuture = origAllowFuture;
+          $.timeago.settings.allowPast = origAllowPast;
+        }
+      });
+
+      module("Disposal");
+
+      asyncTest("disposal", function() {
+        $(".disposal.disposed").timeago('dispose');
+        var initialTime_disposedTimeago = $(".disposal.disposed").html();
+        var initialTime_activeTimeago = $(".disposal.notDisposed").html();
+
+        expect(2);
+        setTimeout(function() {
+          var updatedTime_disposedTimeago = $(".disposal.disposed").html();
+          var updatedTime_activeTimeago = $(".disposal.notDisposed").html();
+
+          ok(initialTime_disposedTimeago === updatedTime_disposedTimeago, "A disposed timeago didn't get updated");
+          ok(initialTime_activeTimeago !== updatedTime_activeTimeago, "A non-disposed timeago continued to be updated");
+
+          // Dispose still-active timeago
+          $(".disposal.notDisposed").timeago('dispose');
+          resetRefreshMillis();
+          start();
+        }, 50);
       });
     })(jQuery);
     //]]>

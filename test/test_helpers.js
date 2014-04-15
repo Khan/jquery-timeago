@@ -22,6 +22,19 @@ function unloadNumbers() {
   jQuery.timeago.settings.strings.numbers = [];
 }
 
+function loadCutoffSetting() {
+	jQuery.timeago.settings.cutoff = 7*24*60*60*1000;
+}
+
+function unloadCutoffSetting() {
+	jQuery.timeago.settings.cutoff = 0;
+}
+
+function setupDisposal() {
+  jQuery.timeago.settings.refreshMillis = 50;
+  $('abbr.disposal').attr("title", iso8601(new Date())).timeago();
+}
+
 function loadPigLatin() {
   jQuery.timeago.settings.strings = {
     suffixAgo: "ago-hay",
@@ -76,6 +89,10 @@ function loadRussian() {
   })();
 }
 
+function resetRefreshMillis() {
+  jQuery.timeago.settings.refreshMillis = 60000;
+}
+
 function loadMillis() {
   var millisSubstitution = function(number, millis) { return millis + " milliseconds"; };
   jQuery.timeago.settings.strings = {
@@ -113,4 +130,50 @@ function loadYoungOldYears() {
   jQuery.extend(jQuery.timeago.settings.strings, {
     years: function(value) { return (value < 21) ? "%d young years" : "%d old years"; }
   });
+}
+
+function loadDoNotAllowFuture() {
+  var mockDateToUse = "2010-01-01";
+  $.timeago.settings.allowFuture = false;
+  enableMockedDate(mockDateToUse);
+}
+
+function unloadDoNotAllowFuture() {
+  $.timeago.settings.allowFuture = true;
+  disableMockedDate();
+}
+
+function loadDoNotAllowPast() {
+  var mockDateToUse = "2010-01-01";
+  $.timeago.settings.allowFuture = true;
+  $.timeago.settings.allowPast = false;
+  $.timeago.settings.strings.inPast = "in the past";
+  enableMockedDate(mockDateToUse);
+}
+
+function unloadDoNotAllowPast() {
+  $.timeago.settings.allowFuture = true;
+  $.timeago.settings.allowPast = true;
+  disableMockedDate();
+}
+
+function enableMockedDate(dateToReturn) {
+  var mockDate = dateToReturn;
+  window.NativeDate = Date;
+  window.Date = function () {
+    if(arguments.length === 0) {
+      return new window.NativeDate(mockDate);
+    } else if(arguments.length === 1) {
+      return new window.NativeDate(arguments[0]);
+    } else  if(arguments.length === 7) {
+      return new window.NativeDate(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6]);
+    } else {
+      throw "Mocking Date with this number of parameters is not implemented.";
+    }
+  }
+}
+
+function disableMockedDate() {
+  window.Date = window.NativeDate;
+  delete window.NativeDate;
 }

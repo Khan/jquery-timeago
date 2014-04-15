@@ -4,7 +4,10 @@ Timeago is a jQuery plugin that makes it easy to support automatically updating
 fuzzy timestamps (e.g. "4 minutes ago" or "about 1 day ago") from ISO 8601
 formatted dates and times embedded in your HTML (à la microformats).
 
-**Please donate some Bitcoin**: `1wzBnMjWVZfpiFMc5i2nzKT7sCBaZNfLK`
+**If you like this project, please help by donating.**
+
+* Gittip: https://www.gittip.com/rmm5t/
+* Bitcoin: `1wzBnMjWVZfpiFMc5i2nzKT7sCBaZNfLK`
 
 ## Usage
 
@@ -54,17 +57,23 @@ As time passes, the timestamps will automatically update.
 
 ## Changes
 
-| Version | Notes                                                            |
-|---------|------------------------------------------------------------------|
-|   1.1.x | ([compare][compare-1.1]) Added update function                   |
-|   1.0.x | ([compare][compare-1.0]) locale updates; bug fixes; AMD wrapper  |
-|  0.11.x | ([compare][compare-0.11]) natural rounding; locale updates;      |
-|  0.10.x | ([compare][compare-0.10]) locale updates                         |
-|   0.9.x | ([compare][compare-0.9]) microsecond support; bug fixes          |
-|   0.8.x | ([compare][compare-0.8]) `<time>` element support; bug fixes     |
-|   0.7.x | ([compare][compare-0.7]) locale function overrides; unit tests   |
-|     ... | ...                                                              |
+| Version | Notes                                                                           |
+|---------|---------------------------------------------------------------------------------|
+|   1.4.x | ([compare][compare-1.4]) Added allowPast setting                                |
+|   1.3.x | ([compare][compare-1.3]) Added updateFromDOM function; bug fixes; bower support |
+|   1.2.x | ([compare][compare-1.2]) Added cutoff setting                                   |
+|   1.1.x | ([compare][compare-1.1]) Added update function                                  |
+|   1.0.x | ([compare][compare-1.0]) locale updates; bug fixes; AMD wrapper                 |
+|  0.11.x | ([compare][compare-0.11]) natural rounding; locale updates;                     |
+|  0.10.x | ([compare][compare-0.10]) locale updates                                        |
+|   0.9.x | ([compare][compare-0.9]) microsecond support; bug fixes                         |
+|   0.8.x | ([compare][compare-0.8]) `<time>` element support; bug fixes                    |
+|   0.7.x | ([compare][compare-0.7]) locale function overrides; unit tests                  |
+|     ... | ...                                                                             |
 
+[compare-1.4]: https://github.com/rmm5t/jquery-timeago/compare/v1.3.2...v1.4.0
+[compare-1.3]: https://github.com/rmm5t/jquery-timeago/compare/v1.2.0...v1.3.2
+[compare-1.2]: https://github.com/rmm5t/jquery-timeago/compare/v1.1.0...v1.2.0
 [compare-1.1]: https://github.com/rmm5t/jquery-timeago/compare/v1.0.2...v1.1.0
 [compare-1.0]: https://github.com/rmm5t/jquery-timeago/compare/v0.11.4...v1.0.2
 [compare-0.11]: https://github.com/rmm5t/jquery-timeago/compare/v0.10.1...v0.11.4
